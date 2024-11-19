@@ -1,0 +1,28 @@
+I want to create a genetic algorithm to effectively play connect 4
+each member of the population will be programmed with an evolutionary program, to evolve finite state machines
+I will be trying to do this without looking anything up
+
+the connect 4 game will be controlled by a 7x6 array, where each member represents a slot in the board
+a member can select any of the 7 columns to drop a token into
+the decision of where to drop the token will be decided by the state machine
+the input to the state machine will be a 42 long string containing the info of the board
+0 will be an empty slot, 1 for the member tokens, and 2 for the opponent member tokens
+
+each member of the population will be an array of data
+it will contain an array representing the state machine, and an array to hold data about the current game it plays
+the state machine will be defined as an array which contains multiple arrays each representing a state
+each state will have at 3 output transitions, one for each different number an input string can contain
+each state will also have a number 0-6, representing which column to drop a token if the state machine ends on that state
+every member of the population must have at least 7 states, 1 for each potential output column, but it can have more
+
+when the entire input string has been considered, the state that is ended upon will decide the column to place a token
+in the event that a member of the population places a token in a full column, then the token will be placed to the right of that column
+if there are no places left, then the game is considered a tie.
+
+fitness will be decided by a tournament, where the winner will move on and the loser will die
+in the event of a tie, in which the whole board is filled with no 4 in a rows, then the member with the most 3 in a rows will live
+in the event of a tie, and there are an equal number of 3 in a rows, then a random choice will occur
+the winner of the game will create a child, with an exact state machine, with at least 1 mutation
+a mutation could be the addition of a state, removal of a state, or a change in the location of an outward transition
+I will start with only 1 mutation, but may change to more later
+
