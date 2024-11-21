@@ -3,8 +3,7 @@ import connect4
 import copy
 
 unitTemplate = {
-    "info": {"id": 0, "fitness": 0, "birthGeneration": 0, "startState": 0, "stateCount": 0, "col0": 1, "col1": 1, "col2": 1, "col3": 1, "col4": 1,
-             "col5": 1, "col6": 1}, "stateMachine": [], "currentGame": {"currentState": 0}}
+    "info": {"id": 0, "fitness": 0, "birthGeneration": 0, "startState": 0, "stateCount": 0}, "stateMachine": [], "currentGame": {"currentState": 0}}
 
 stateTemplate = [0, [0, 0, 0]]
 # state template:
@@ -41,6 +40,7 @@ def initializePopulation():
 def getFitnesses(units):
     opponents = 5
     weightOfStateCount = 0.7
+    weightOfStateUse = 0.5
     for u in units:
         u["info"]["fitness"] = 0
         choices = []
@@ -52,9 +52,18 @@ def getFitnesses(units):
                     choices.append(randOpponent)
                     chosen = True
         for o in choices:
-            win = playGame(u, o, connect4.createBoard())
-            if win == 1:
-                u["info"]["fitness"] += 1
+            firstTurn = random.randint(1, 2)
+            if firstTurn == 1:
+                gameStats = playGame(u, o, connect4.createBoard())
+                u["info"]["fitness"] += gameStats[1][0] / len(u["stateMachine"]) * weightOfStateUse
+
+                if gameStats[0] == 1:
+                    u["info"]["fitness"] += 1
+            else:
+                gameStats = playGame(o, u, connect4.createBoard())
+                u["info"]["fitness"] += gameStats[1][0] / len(u["stateMachine"]) * weightOfStateUse
+                if gameStats[0] == 2:
+                    u["info"]["fitness"] += 1
 
         u["info"]["fitness"] += (u["info"]["stateCount"] / stateCountMax) * weightOfStateCount
 
@@ -88,11 +97,15 @@ def tournament(units):
 def playGame(player1, player2, board):
     player1Number = 1
     player2Number = 2
+    totalStateUse1 = 0
+    totalStateUse2 = 0
     gameLoop = True
     tie = False
     turns = 0
     while gameLoop:
-        valid = connect4.place(board, player1Number, decideMove(player1, board))
+        moveDecide = decideMove(player1, board)
+        totalStateUse1 += len(moveDecide[1])
+        valid = connect4.place(board, player1Number, moveDecide[0])
         if not valid:
             gameLoop = False
             tie = True
@@ -100,8 +113,10 @@ def playGame(player1, player2, board):
         turns += 1
         win = connect4.checkWin(board)
         if win:
-            return player1Number
-        valid = connect4.place(board, player2Number, decideMove(player2, board))
+            return player1Number, (totalStateUse1 / turns, totalStateUse2 / turns)
+        moveDecide = decideMove(player2, board)
+        totalStateUse2 += len(moveDecide[1])
+        valid = connect4.place(board, player2Number, moveDecide[0])
         if not valid:
             gameLoop = False
             tie = True
@@ -109,22 +124,25 @@ def playGame(player1, player2, board):
         turns += 1
         win = connect4.checkWin(board)
         if win:
-            return player2Number
+            return player2Number, (totalStateUse1 / turns, totalStateUse2 / turns)
     if tie:
-        return 0
+        return 0, (totalStateUse1 / turns, totalStateUse2 / turns)
 
 
 def decideMove(player, board, player2=False):
     stateMachine = player["stateMachine"]
     currentPosition = player["info"]["startState"]
     boardString = connect4.getBoardString(board)
+    statesVisited = [currentPosition]
     if player2:
         boardString = boardString.replace("1", "a")
         boardString = boardString.replace("2", "1")
         boardString = boardString.replace("a", "2")
     for char in boardString:
         currentPosition = stateMachine[currentPosition][1][int(char)]
-    return stateMachine[currentPosition][0]
+        if not statesVisited.__contains__(currentPosition):
+            statesVisited.append(currentPosition)
+    return stateMachine[currentPosition][0], statesVisited
 
 
 def repopulate(units, generation):
@@ -172,7 +190,7 @@ def repopulate(units, generation):
 
 
 def mutate(unit):
-    mutations = [1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 4]
+    mutations = [1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 3, 3, 4]
     for m in range(mutationCount):
         mutation = random.choice(mutations)
         if mutation == 1: # change transition of state
@@ -194,12 +212,9 @@ def mutate(unit):
             if unit["info"]["stateCount"] == 1:
                 pass
             else:
-
                 choices = list(range(len(unit["stateMachine"])))
                 deleteState = random.choice(choices)
-
                 dests = [unit["stateMachine"][deleteState][1][0], unit["stateMachine"][deleteState][1][1], unit["stateMachine"][deleteState][1][2]]
-
                 for state in range(len(unit["stateMachine"])):
                     for i in range(0, 3):
                         if unit["stateMachine"][state][1][i] == deleteState:
@@ -227,6 +242,7 @@ def mutate(unit):
 def getFit(e):
     return e["info"]["fitness"]
 
+
 def saveUnit(unit):
     StringData = ""
     StringData += str(unit["info"]["birthGeneration"]) + "|"
@@ -237,3 +253,20 @@ def saveUnit(unit):
         StringData += str(trans[1][0]) + "," + str(trans[1][1]) + "," + str(trans[1][2]) + "]]|"
     StringData = StringData[:-1]
     return StringData
+
+
+def loadUnit(unitString:str):
+    unit = copy.copy(unitTemplate)
+    unitInfo = unitString.split("|")
+    unit["info"]["birthGeneration"] = int(unitInfo[0])
+    unit["info"]["startState"] = int(unitInfo[1])
+    unit["info"]["stateCount"] = int(unitInfo[2])
+    for i in range(3, len(unitInfo)):
+        stateParts = unitInfo[i].replace("[", ",").replace("]", "").split(",")
+        newState = copy.copy(stateTemplate)
+        newState[0] = int(stateParts[1])
+        newState[1][0] = int(stateParts[2])
+        newState[1][1] = int(stateParts[3])
+        newState[1][2] = int(stateParts[4])
+        unit["stateMachine"].append(newState)
+    return unit

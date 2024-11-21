@@ -11,7 +11,7 @@ def createBoard():
 
     return board
 
-
+# team is a number, usually 1 or 2
 def place(board, team, col):
     if boardFull(board):
         return False
