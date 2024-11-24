@@ -4,6 +4,7 @@ import copy
 import random
 import math
 import pickle
+import os
 
 def getPossibleMoves(board):
     moves = []
@@ -16,7 +17,7 @@ def getPossibleMoves(board):
 
 class Blondie(network.Network):
 
-    def minimax(self, board, team=1, depth=8):
+    def minimax(self, board, team=1, depth=1):
         if depth == 0:
             return self.evaluate(board), None
         
@@ -31,7 +32,7 @@ class Blondie(network.Network):
             if not c4.place(boardCopy, team, move):
                 continue
             score, _ = self.minimax(boardCopy, -team, depth-1)
-            
+
             if team ==1:
                 if score > bestScore:
                     bestScore = score
@@ -47,12 +48,17 @@ def playGame(player1, player2):
     board = c4.createBoard()
     
     while not c4.boardFull(board):
+        
         _, player1Move = player1.minimax(board)
         c4.place(board, 1, player1Move)
+        #os.system('clear')
+        #print(c4.printBoard(board))
         if c4.checkWin(board) == 1: return 1
 
         _, player2Move = player2.minimax(board)
         c4.place(board, -1, player2Move)
+        #os.system('clear')
+        #print(c4.printBoard(board))
         if c4.checkWin(board) == -1: return -1
 
     return 0
@@ -61,29 +67,45 @@ def playGame(player1, player2):
 def runES(generations = 840):
     networks = [Blondie() for _ in range(15)]
     offspring = [network.createOffspring() for network in networks]
-    networks.append(offspring)
+    networks.extend(offspring)
 
-    for _ in range(generations):
+    for i in range(generations):
+        print("Generation: ", i)
 
+        j = 1
         for currentNetwork in networks:
+            
             possibleOpponents = [n for n in networks if n is not currentNetwork]
             selctedOpponents = random.choices(possibleOpponents, k=5)
 
             for opponent in selctedOpponents:
-                if playGame(currentNetwork, opponent) == 1: currentNetwork.fitness += 1
-                if playGame(currentNetwork, opponent) == 0: currentNetwork.fitness += 0
-                if playGame(currentNetwork, opponent) == -1: currentNetwork.fitness += -2
+                
+                outcome = playGame(currentNetwork, opponent)
+                if outcome == 1: currentNetwork.fitness += 1
+                elif outcome == -1: currentNetwork.fitness -= 2
+
+            print(f"net {j} fitness: {currentNetwork.fitness}")
+            j += 1
+        print("===========================")
             
         networks.sort(key=lambda g: g.fitness)
         networks = networks[:15] # select survivors
+        for network in networks: network.fitness = 0
         offspring = [network.createOffspring() for network in networks]
-        networks.append(offspring)
+        networks.extend(offspring)
     
     networks.sort(key=lambda g: g.fitness)
     return networks[-1]
 
+
+""" test = c4.createBoard()
+c4.place(test, 1, 0)
+c4.place(test, -1, 1)
+print(c4.printBoard(test))
+print(network.getSubsquares(c4.getBoardString(test), 6, 7))
+ """
 bestNetwork = runES()
 with open('bestNetwork.pkl', 'wb') as f:
-    pickle.dump(bestNetwork, f)
+    pickle.dump(bestNetwork, f) 
 
 
