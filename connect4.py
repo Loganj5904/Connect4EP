@@ -23,7 +23,7 @@ def place(board, team, col):
         newSpot = col + 1
         if newSpot > len(board) - 1:
             newSpot = 0
-        place(board, team, newSpot)
+        return place(board, team, newSpot)
     return True
 
 
