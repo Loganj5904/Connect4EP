@@ -17,7 +17,7 @@ def getPossibleMoves(board):
 
 class Blondie(network.Network):
 
-    def minimax(self, board, team=1, depth=2):
+    def minimax(self, board, team=1, depth=7):
         if depth == 0:
             return self.evaluate(board), None
         
@@ -33,7 +33,7 @@ class Blondie(network.Network):
                 continue
             score, _ = self.minimax(boardCopy, -team, depth-1)
 
-            if team ==1:
+            if team == 1:
                 if score > bestScore:
                     bestScore = score
                     bestMove = move
@@ -44,18 +44,18 @@ class Blondie(network.Network):
         
         return bestScore, bestMove
 
-def playGame(player1, player2):
+def playGame(player1, player2, depth):
     board = c4.createBoard()
     
     while not c4.boardFull(board):
         
-        _, player1Move = player1.minimax(board)
+        _, player1Move = player1.minimax(board, 1, depth)
         c4.place(board, 1, player1Move)
         #os.system('clear')
         #print(c4.printBoard(board))
         if c4.checkWin(board) == 1: return 1
 
-        _, player2Move = player2.minimax(board)
+        _, player2Move = player2.minimax(board, -1, depth)
         c4.place(board, -1, player2Move)
         #os.system('clear')
         #print(c4.printBoard(board))
@@ -64,13 +64,13 @@ def playGame(player1, player2):
     return 0
 
 
-def runES(generations = 840):
+def runES(generations = 840, depth = 7):
     networks = [Blondie() for _ in range(15)]
     offspring = [network.createOffspring() for network in networks]
     networks.extend(offspring)
 
     for i in range(generations):
-        print("Generation: ", i)
+        print(f"Generation: {i+1}/{generations}; Depth = {depth}")
 
         j = 1
         for currentNetwork in networks:
@@ -80,7 +80,7 @@ def runES(generations = 840):
 
             for opponent in selctedOpponents:
                 
-                outcome = playGame(currentNetwork, opponent)
+                outcome = playGame(currentNetwork, opponent, depth)
                 if outcome == 1: currentNetwork.fitness += 1
                 elif outcome == -1: currentNetwork.fitness -= 2
 
@@ -104,7 +104,7 @@ c4.place(test, -1, 1)
 print(c4.printBoard(test))
 print(network.getSubsquares(c4.getBoardString(test), 6, 7))
  """
-bestNetworks = runES(100)
+bestNetworks = runES(100, 2)
 with open('best15Networks.pkl', 'wb') as f:
     pickle.dump(bestNetworks, f) 
 

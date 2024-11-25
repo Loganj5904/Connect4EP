@@ -81,6 +81,7 @@ class Network():
     
 
     def createOffspring(self):
+        print("initializing network...")        
         offspring = copy.deepcopy(self)
         offspring.sigma = offspring.sigma * exp(tau*random.gauss(0,1))
 
