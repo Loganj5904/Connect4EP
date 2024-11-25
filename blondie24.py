@@ -17,7 +17,7 @@ def getPossibleMoves(board):
 
 class Blondie(network.Network):
 
-    def minimax(self, board, team=1, depth=1):
+    def minimax(self, board, team=1, depth=2):
         if depth == 0:
             return self.evaluate(board), None
         
@@ -95,8 +95,8 @@ def runES(generations = 840):
         networks.extend(offspring)
     
     networks.sort(key=lambda g: g.fitness)
-    return networks[-1]
-
+    #return networks[-1] #change depending on how many networks to save
+    return networks
 
 """ test = c4.createBoard()
 c4.place(test, 1, 0)
@@ -104,8 +104,8 @@ c4.place(test, -1, 1)
 print(c4.printBoard(test))
 print(network.getSubsquares(c4.getBoardString(test), 6, 7))
  """
-bestNetwork = runES()
-with open('bestNetwork.pkl', 'wb') as f:
-    pickle.dump(bestNetwork, f) 
+bestNetworks = runES(100)
+with open('best15Networks.pkl', 'wb') as f:
+    pickle.dump(bestNetworks, f) 
 
 
