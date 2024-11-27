@@ -104,7 +104,7 @@ c4.place(test, -1, 1)
 print(c4.printBoard(test))
 print(network.getSubsquares(c4.getBoardString(test), 6, 7))
  """
-bestNetworks = runES(100, 2)
+bestNetworks = runES(100, 3)
 with open('best15Networks.pkl', 'wb') as f:
     pickle.dump(bestNetworks, f) 
 
