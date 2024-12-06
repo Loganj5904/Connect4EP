@@ -83,23 +83,23 @@ class Network():
     def createOffspring(self):
         print("initializing network...")        
         offspring = copy.deepcopy(self)
-        offspring.sigma = offspring.sigma * exp(tau*random.gauss(0,1))
+        offspring.sigma *= exp(tau*random.gauss(0,1))
 
         kingDelta = random.choice([-0.1, 0.0, 0.1])
         if offspring.kingValue + kingDelta < 3.0 and offspring.kingValue + kingDelta > 1.0:
             offspring.kingValue += kingDelta
 
         def mutate(l):
-            l = [wj + offspring.sigma * random.gauss(0,1) for wj in l]
+            return [wj + offspring.sigma * random.gauss(0,1) for wj in l]
         
-        mutate(offspring.weightsInputHidden1)
-        mutate(offspring.biasHidden1)
-        mutate(offspring.weightsHidden1Hidden2)
-        mutate(offspring.biasHidden2)
-        mutate(offspring.weightsHidden2Hidden3)
-        mutate(offspring.biasHidden3)
-        mutate(offspring.weightsHidden3Output)
-        mutate(offspring.biasOutput)
+        offspring.weightsInputHidden1 = mutate(offspring.weightsInputHidden1)
+        offspring.biasHidden1 = mutate(offspring.biasHidden1)
+        offspring.weightsHidden1Hidden2 = mutate(offspring.weightsHidden1Hidden2)
+        offspring.biasHidden2 = mutate(offspring.biasHidden2)
+        offspring.weightsHidden2Hidden3 = mutate(offspring.weightsHidden2Hidden3)
+        offspring.biasHidden3 = mutate(offspring.biasHidden3)
+        offspring.weightsHidden3Output = mutate(offspring.weightsHidden3Output)
+        offspring.biasOutput = mutate(offspring.biasOutput)
 
         return offspring
 

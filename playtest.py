@@ -49,7 +49,7 @@ print("network opened.")
 
 board = c4.createBoard()
 while not c4.boardFull(board):
-    _, blondieMove = blondie.minimax(board)
+    _, blondieMove = blondie.alphabeta(board, 1, 5)
     c4.place(board, 1, blondieMove)
     os.system('clear')
     print(printPrettyBoard(board))
