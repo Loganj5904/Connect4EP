@@ -43,17 +43,33 @@ def playGameTest(board, unit):
 
 def runEP(units, board):
     unitPopulation = units
-    for g in range(population.generations):
-        pickedUnits = population.pickUnits(10, unitPopulation)
-        newUnits = population.MuLambdaRepopulate(pickedUnits, g + 1)
-        newUnitsAdded = 0
-        for picked in pickedUnits:
-            for i in range(len(units)):
-                if population.unitCompare(picked, units[i]):
-                    units[i] = newUnits[newUnitsAdded]
-                    newUnitsAdded += 1
-                    break
-        print(g)
+    if not population.useTime:
+        for g in range(population.generations):
+            pickedUnits = population.pickUnits(10, unitPopulation)
+            newUnits = population.MuLambdaRepopulate(pickedUnits, g + 1)
+            newUnitsAdded = 0
+            for picked in pickedUnits:
+                for i in range(len(units)):
+                    if population.unitCompare(picked, units[i]):
+                        units[i] = newUnits[newUnitsAdded]
+                        newUnitsAdded += 1
+                        break
+            print(g)
+    else:
+        startTime = time.time()
+        gCount = 0
+        while time.time() - startTime < population.runTime:
+            pickedUnits = population.pickUnits(10, unitPopulation)
+            newUnits = population.MuLambdaRepopulate(pickedUnits, gCount + 1)
+            newUnitsAdded = 0
+            for picked in pickedUnits:
+                for i in range(len(units)):
+                    if population.unitCompare(picked, units[i]):
+                        units[i] = newUnits[newUnitsAdded]
+                        newUnitsAdded += 1
+                        break
+            print(gCount)
+            gCount += 1
     file = open("savedUnits.txt", "a")
     for u in unitPopulation:
         file.write(population.saveUnit(u) + "\n")

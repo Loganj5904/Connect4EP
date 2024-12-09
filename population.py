@@ -29,6 +29,8 @@ weightOfOverflow = 0.05
 weightOfEnemy3s = 0.1
 
 generations = 10
+runTime = 60 #864000
+useTime = True
 
 # repopulate parameters
 unitCreate = 70
