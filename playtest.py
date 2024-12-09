@@ -41,7 +41,7 @@ def printPrettyBoard(board):
 
 
 print("opening network...")
-with open('best15Networks.pkl', 'rb') as f:
+with open('100g4dbest15Networks.pkl', 'rb') as f:
     blondies = pickle.load(f)
 blondie = blondies[-1]
 print("network opened.")
