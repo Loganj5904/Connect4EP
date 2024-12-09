@@ -111,3 +111,11 @@ def getBoardString(board):
         for col in range(len(board)):
             boardString += str(board[col][len(board[0]) - row - 1])
     return boardString
+
+
+def getBoardStringCol(board):
+    boardString = ""
+    for col in range(len(board)):
+        for row in range(len(board[0])):
+            boardString += str(board[col][len(board[0]) - row - 1])
+    return boardString
