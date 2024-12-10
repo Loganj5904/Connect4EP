@@ -26,6 +26,15 @@ def place(board, team, col):
         return place(board, team, newSpot)
     return True
 
+def placeBlondie(board, team, col):
+    if boardFull(board):
+        return False
+    height = columnHeight(board, col)
+    if height < len(board[col]):  # If the column is not full
+        board[col][height] = team
+        return True
+    return False
+
 
 def columnHeight(board, col):
     column = board[col]
