@@ -211,11 +211,13 @@ def decideMove(player, board, player2=False):
     currentPosition = player["info"]["startState"]
     boardString = connect4.getBoardStringCol(board)
     statesVisited = [currentPosition]
+    boardString = boardString.replace("-1", "2")
     if player2:
         boardString = boardString.replace("1", "a")
         boardString = boardString.replace("2", "1")
         boardString = boardString.replace("a", "2")
     for char in boardString:
+        if char == "-1": char = 2
         currentPosition = stateMachine[currentPosition][1][int(char)]
         if not statesVisited.__contains__(currentPosition):
             statesVisited.append(currentPosition)

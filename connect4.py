@@ -26,6 +26,7 @@ def place(board, team, col):
         return place(board, team, newSpot)
     return True
 
+
 def placeBlondie(board, team, col):
     if boardFull(board):
         return False
