@@ -2,7 +2,7 @@ from blondie24 import *
 import population
 import connect4
 import pickle
-
+import time
 
 def compete(EPMachine, BLNetwork, turnStart=0):
     board = connect4.createBoard()
@@ -10,6 +10,7 @@ def compete(EPMachine, BLNetwork, turnStart=0):
     currentTurn = turnStart
     while gameLoop:
         if currentTurn == 0:
+            start = time.time()
             col, _ = population.decideMove(EPMachine, board, turnStart == 0)
             full = not connect4.place(board, 1, col)
             if full:
@@ -19,7 +20,9 @@ def compete(EPMachine, BLNetwork, turnStart=0):
                 print("EP Win")
                 return 1
             currentTurn = 1
+            print("EP turn time:", time.time() - start)
         elif currentTurn == 1:
+            start = time.time()
             col = BLNetwork.alphabeta(board, team=1, depth=4)[1]
             full = not connect4.place(board, -1, col)
             if full:
@@ -29,12 +32,13 @@ def compete(EPMachine, BLNetwork, turnStart=0):
                 print("BL Win")
                 return 2
             currentTurn = 0
+            print("BL turn time:", time.time() - start)
 
 
 def runGames():
     results = []
     EPUnits = []
-    with open('100g4dbest15Networks.pkl', 'rb') as f:
+    with open('840g4dbest15Networks.pkl', 'rb') as f:
         BLUnits = pickle.load(f)
 
     with open('runNetworks.txt', 'rb') as f:

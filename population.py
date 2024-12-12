@@ -29,7 +29,7 @@ weightOfOverflow = 0.05
 weightOfEnemy3s = 0.1
 
 generations = 10
-runTime = 60 #864000
+runTime = 432000 #864000
 useTime = True
 
 # repopulate parameters
@@ -282,8 +282,19 @@ def MuLambdaRepopulate(units, generation):
         testUnits.append(randomUnit)
     getFitnesses(testUnits)
     testUnits.sort(key=getFit)
+    choices = []
+    for i in range(len(testUnits)):
+        choices.append(len(testUnits) - i)
     for i in range(len(units)):
-        newUnits.append(testUnits[i])
+        unitChoice = random.random() * sum(choices)
+        check = 0
+        for c in range(len(choices)):
+            check += choices[c]
+            if unitChoice <= check:
+                newUnits.append(testUnits[c])
+                testUnits.remove(testUnits[c])
+                choices.remove(choices[c])
+                break
     for unit in newUnits:
         unit["info"]["id"] = currentID
         unit["info"]["birthGeneration"] = generation
